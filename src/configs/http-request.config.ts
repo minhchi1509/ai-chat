@@ -1,9 +1,7 @@
 'use server';
 import axios, { AxiosError } from 'axios';
 import { redirect } from 'next/navigation';
-import { getServerSession } from 'next-auth';
 
-import { authOptions } from 'src/app/api/auth/[...nextauth]/route';
 import {
   ErrorResponse,
   TErrorResponseData
@@ -17,13 +15,6 @@ const logRequestDetail = false;
 
 axiosInstance.interceptors.request.use(
   async (config) => {
-    const session = await getServerSession(authOptions);
-    const accessToken = session?.user.mainProfile.accessToken || '';
-
-    if (accessToken) {
-      config.headers['Authorization'] = `Bearer ${accessToken}`;
-    }
-
     if (logRequestDetail) {
       const METHOD = config.method;
       const REQUEST_HEADERS = config.headers;

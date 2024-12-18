@@ -3,7 +3,6 @@ import { AppProgressBar as ProgressBar } from 'next-nprogress-bar';
 import { PropsWithChildren } from 'react';
 import { Toaster } from 'sonner';
 
-import TanstackQueryProvider from './TanstackQueryProvider';
 import ThemesProvider from 'src/components/providers/ThemesProvider';
 
 const AppProvider = ({ children }: PropsWithChildren) => {
@@ -24,7 +23,7 @@ const AppProvider = ({ children }: PropsWithChildren) => {
               `}
       />
       <Toaster />
-      <TanstackQueryProvider>{children}</TanstackQueryProvider>
+      {children}
     </ThemesProvider>
   );
 };
