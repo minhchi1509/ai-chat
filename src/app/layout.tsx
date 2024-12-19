@@ -1,5 +1,4 @@
 /* eslint-disable import/no-unresolved */
-import { GeistSans } from 'geist/font/sans';
 import { Metadata } from 'next';
 import { PropsWithChildren } from 'react';
 
@@ -14,7 +13,7 @@ export const metadata: Metadata = {
 
 const RootLayout = ({ children }: PropsWithChildren) => {
   return (
-    <html lang="en" suppressHydrationWarning className={GeistSans.className}>
+    <html lang="en" suppressHydrationWarning>
       <body>
         <AppProvider>{children}</AppProvider>
       </body>

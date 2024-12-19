@@ -1,6 +1,7 @@
 'use client';
 import MarkdownPreview from '@uiw/react-markdown-preview';
 import { useChat } from 'ai/react';
+import { useEffect, useRef } from 'react';
 
 import { AIChatIcon } from 'src/assets/icons';
 import { Button } from 'src/components/ui/library/button';
@@ -15,7 +16,32 @@ import { Input } from 'src/components/ui/library/input';
 import { ScrollArea } from 'src/components/ui/library/scroll-area';
 
 const Homepage = () => {
+  const messagesEndRef = useRef<HTMLDivElement>(null);
   const { messages, input, handleInputChange, handleSubmit } = useChat();
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'auto' });
+  };
+
+  useEffect(() => {
+    const elem: HTMLElement | null = document.querySelector(
+      'div[data-radix-scroll-area-viewport] > div'
+    );
+    console.log('elem', elem);
+
+    if (elem) elem.style.removeProperty('display');
+  }, []);
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  useEffect(() => {
+    if (messages[messages.length - 1]?.role === 'assistant') {
+      scrollToBottom();
+    }
+  }, [input]);
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-100 p-4">
       <Card className="w-full max-w-6xl">
@@ -32,21 +58,23 @@ const Homepage = () => {
               >
                 {m.role === 'user' ? (
                   <span
-                    className={`inline-block max-w-md rounded-lg bg-blue-500 p-2.5 text-left text-white`}
+                    className={`inline-block max-w-[75%] rounded-lg bg-blue-500 p-2.5 text-left text-white`}
                   >
                     {m.content}
                   </span>
                 ) : (
-                  <div className="flex gap-2">
+                  <div className="flex flex-row gap-2">
                     <AIChatIcon className="size-6" />
                     <MarkdownPreview
                       source={m.content}
+                      style={{ maxWidth: 'calc(100% - 2rem)' }}
                       wrapperElement={{
                         'data-color-mode': 'light'
                       }}
                     />
                   </div>
                 )}
+                <div ref={messagesEndRef} />
               </div>
             ))}
           </ScrollArea>
