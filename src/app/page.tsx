@@ -17,6 +17,7 @@ import {
 } from 'src/components/ui/library/card';
 import { Input } from 'src/components/ui/library/input';
 import { ScrollArea } from 'src/components/ui/library/scroll-area';
+import TypewriterMarkdown from 'src/components/ui/shared/TypewriterMarkdown';
 
 const Homepage = () => {
   const { theme, setTheme } = useTheme();
@@ -24,7 +25,7 @@ const Homepage = () => {
   const { messages, input, handleInputChange, handleSubmit } = useChat();
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'auto' });
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
   useEffect(() => {
@@ -35,11 +36,8 @@ const Homepage = () => {
   }, []);
 
   useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
-
-  useEffect(() => {
-    if (messages[messages.length - 1]?.role === 'assistant') {
+    // Tự động cuộn xuống khi gõ trong input
+    if (input && input.length > 0) {
       scrollToBottom();
     }
   }, [input]);
@@ -67,7 +65,7 @@ const Homepage = () => {
         </CardHeader>
         <CardContent>
           <ScrollArea className="h-[60vh] pr-4">
-            {messages.map((m) => (
+            {messages.map((m, index) => (
               <div
                 key={m.id}
                 className={`mb-4 ${m.role === 'user' ? 'text-right' : 'text-left'}`}
@@ -79,22 +77,30 @@ const Homepage = () => {
                 ) : (
                   <div className="flex flex-row gap-2">
                     <AIChatIcon className="size-6 text-blue-500 dark:text-blue-400" />
-                    <MarkdownPreview
-                      source={m.content}
-                      style={{
-                        maxWidth: 'calc(100% - 2rem)',
-                        backgroundColor: 'transparent'
-                      }}
-                      wrapperElement={{
-                        'data-color-mode': theme === 'dark' ? 'dark' : 'light'
-                      }}
-                      className="text-gray-800 dark:text-gray-200"
-                    />
+                    {index === messages.length - 1 ? (
+                      <TypewriterMarkdown
+                        streamingText={m.content}
+                        typingSpeed={1}
+                      />
+                    ) : (
+                      <MarkdownPreview
+                        key={m.id}
+                        source={m.content}
+                        style={{
+                          maxWidth: 'calc(100% - 2rem)',
+                          backgroundColor: 'transparent'
+                        }}
+                        wrapperElement={{
+                          'data-color-mode': theme === 'dark' ? 'dark' : 'light'
+                        }}
+                        className="text-gray-800 dark:text-gray-200"
+                      />
+                    )}
                   </div>
                 )}
-                <div ref={messagesEndRef} />
               </div>
             ))}
+            <div ref={messagesEndRef} id="message-end-mlpiu" />
           </ScrollArea>
         </CardContent>
         <CardFooter>
@@ -106,6 +112,7 @@ const Homepage = () => {
               className="grow bg-white text-gray-900 dark:bg-gray-700 dark:text-white"
             />
             <Button
+              disabled={!input.trim()}
               type="submit"
               className="bg-blue-500 text-white hover:bg-blue-600"
             >
