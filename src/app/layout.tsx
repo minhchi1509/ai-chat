@@ -1,4 +1,3 @@
-/* eslint-disable import/no-unresolved */
 import { Metadata } from 'next';
 import { PropsWithChildren } from 'react';
 

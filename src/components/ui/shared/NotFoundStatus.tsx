@@ -4,7 +4,7 @@ import { MoveLeftIcon } from 'lucide-react';
 import { useRouter } from 'next-nprogress-bar';
 import { FC } from 'react';
 
-import { Button } from 'src/components/ui/library/button';
+import { Button } from 'src/components/ui/shadcn-ui/button';
 import { cn } from 'src/utils/common.util';
 
 interface INotFoundStatusProps {

@@ -1,31 +1,40 @@
+/* eslint-disable @typescript-eslint/no-floating-promises */
 'use client';
 
+import { useChat } from '@ai-sdk/react';
 import MarkdownPreview from '@uiw/react-markdown-preview';
-import { useChat } from 'ai/react';
 import { MoonIcon, SunIcon } from 'lucide-react';
 import { useTheme } from 'next-themes';
-import { useEffect, useRef } from 'react';
+import { FormEventHandler, useEffect, useRef, useState } from 'react';
 
 import { AIChatIcon } from 'src/assets/icons';
-import { Button } from 'src/components/ui/library/button';
+import { Button } from 'src/components/ui/shadcn-ui/button';
 import {
   Card,
   CardContent,
   CardFooter,
   CardHeader,
   CardTitle
-} from 'src/components/ui/library/card';
-import { Input } from 'src/components/ui/library/input';
-import { ScrollArea } from 'src/components/ui/library/scroll-area';
+} from 'src/components/ui/shadcn-ui/card';
+import { Input } from 'src/components/ui/shadcn-ui/input';
+import { ScrollArea } from 'src/components/ui/shadcn-ui/scroll-area';
 import TypewriterMarkdown from 'src/components/ui/shared/TypewriterMarkdown';
 
 const Homepage = () => {
   const { theme, setTheme } = useTheme();
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const { messages, input, handleInputChange, handleSubmit } = useChat();
+  const [input, setInput] = useState('');
+  const { messages, sendMessage } = useChat();
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const handleSubmit: FormEventHandler<HTMLFormElement> = (event) => {
+    event.preventDefault();
+    scrollToBottom();
+    setInput('');
+    sendMessage({ text: input });
   };
 
   useEffect(() => {
@@ -34,13 +43,6 @@ const Homepage = () => {
     );
     if (elem) elem.style.removeProperty('display');
   }, []);
-
-  useEffect(() => {
-    // Tự động cuộn xuống khi gõ trong input
-    if (input && input.length > 0) {
-      scrollToBottom();
-    }
-  }, [input]);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-100 p-4 dark:bg-gray-900">
@@ -72,30 +74,42 @@ const Homepage = () => {
               >
                 {m.role === 'user' ? (
                   <span className="inline-block max-w-[75%] rounded-lg bg-blue-500 p-2.5 text-left text-white">
-                    {m.content}
+                    {m.parts.map((part, i) => {
+                      switch (part.type) {
+                        case 'text':
+                          return <div key={`${m.id}-${i}`}>{part.text}</div>;
+                      }
+                    })}
                   </span>
                 ) : (
                   <div className="flex flex-row gap-2">
-                    <AIChatIcon className="size-6 text-blue-500 dark:text-blue-400" />
-                    {index === messages.length - 1 ? (
-                      <TypewriterMarkdown
-                        streamingText={m.content}
-                        typingSpeed={1}
-                      />
-                    ) : (
-                      <MarkdownPreview
-                        key={m.id}
-                        source={m.content}
-                        style={{
-                          maxWidth: 'calc(100% - 2rem)',
-                          backgroundColor: 'transparent'
-                        }}
-                        wrapperElement={{
-                          'data-color-mode': theme === 'dark' ? 'dark' : 'light'
-                        }}
-                        className="text-gray-800 dark:text-gray-200"
-                      />
-                    )}
+                    <AIChatIcon className="size-6 text-blue-500 dark:text-blue-400 shrink-0" />
+                    {m.parts.map((part, i) => {
+                      switch (part.type) {
+                        case 'text':
+                          return index === messages.length - 1 ? (
+                            <TypewriterMarkdown
+                              key={`${m.id}-${i}`}
+                              streamingText={part.text}
+                              typingSpeed={1}
+                            />
+                          ) : (
+                            <MarkdownPreview
+                              key={`${m.id}-${i}`}
+                              source={part.text}
+                              style={{
+                                maxWidth: 'calc(100% - 2rem)',
+                                backgroundColor: 'transparent'
+                              }}
+                              wrapperElement={{
+                                'data-color-mode':
+                                  theme === 'dark' ? 'dark' : 'light'
+                              }}
+                              className="text-gray-800 dark:text-gray-200"
+                            />
+                          );
+                      }
+                    })}
                   </div>
                 )}
               </div>
@@ -107,7 +121,7 @@ const Homepage = () => {
           <form onSubmit={handleSubmit} className="flex w-full space-x-2">
             <Input
               value={input}
-              onChange={handleInputChange}
+              onChange={(e) => setInput(e.target.value)}
               placeholder="Type your message..."
               className="grow bg-white text-gray-900 dark:bg-gray-700 dark:text-white"
             />

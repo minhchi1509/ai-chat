@@ -1,6 +1,7 @@
-node_modules
-build
-dist
-.next
-.idea
+/node_modules
+/build
+/dist
+/public
+/.next
+/.idea
 package-lock.json
